@@ -6,6 +6,7 @@ import { useConference } from "@/lib/context";
 import { Resolution } from "@/lib/domain";
 import { Chip, Empty, Icon, Modal, PageHeading, Panel, Timeline } from "./ui";
 import { ResolutionSources } from "./operations/resolution-links";
+import { PRINT_SPARES } from "@/lib/print";
 export function DocumentPreview({ resolution }: { resolution: Resolution }) {
   const { data } = useConference();
   const [versionId, setVersionId] = useState("");
@@ -549,7 +550,7 @@ export function Logistics() {
       </div>
       <Panel
         title="Print queue"
-        subtitle="Prepare copies, then mark the job complete."
+        subtitle={`Copies are one per committee delegate plus ${PRINT_SPARES} spares, counted when the resolution is approved. Prepare them, then mark the job complete.`}
       >
         {queue.length ? (
           <div className="print-list">
