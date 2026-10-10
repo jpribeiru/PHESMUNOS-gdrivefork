@@ -10,6 +10,7 @@ import {
   Vote,
 } from "./domain";
 import { applyOperationsCommand, isOperationsCommand, operationsRoles, type OperationsCommand } from "./operations/commands";
+import { printCopies } from "./print";
 import { conferenceScoring, isAutomaticScoring, scoringProblem, scoringValues } from "./scoring";
 import { countryFlag } from "./countries";
 export { effectiveScoring } from "./scoring";
@@ -339,6 +340,7 @@ export function applyCommand(
       if(c.status==="In Debate") {const current=d.committees.find(x=>x.id===r.committeeId)?.currentSessionId;if(current)r.sessionId=current;}
       r.status = c.status;
       r.outcome = c.outcome;
+      if (c.status === "Approved") r.copies = printCopies(d, r.committeeId);
       if(c.status === "Closed") r.vetoedBy=c.outcome==="Withdrawn"?[]:vetoDelegates(d,r.id);
       if (c.comment)
         r.comments.push({
