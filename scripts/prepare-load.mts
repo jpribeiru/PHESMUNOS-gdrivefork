@@ -1,3 +1,5 @@
+// PHESMUN: load and rehearsal tools are disabled. The only Supabase project here is the live conference on Free/Nano.
+console.error('Refused: load/rehearsal tools are disabled in PHESMUN OS (live conference project on Supabase Free/Nano).');process.exit(2);
 import {randomUUID} from 'node:crypto';
 import {writeFile} from 'node:fs/promises';
 import {session} from './remote-context.mts';

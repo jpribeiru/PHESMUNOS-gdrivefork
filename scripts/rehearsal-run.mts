@@ -1,3 +1,5 @@
+// PHESMUN: load and rehearsal tools are disabled. The only Supabase project here is the live conference on Free/Nano.
+console.error('Refused: load/rehearsal tools are disabled in PHESMUN OS (live conference project on Supabase Free/Nano).');process.exit(2);
 // Realistic staging rehearsal. Opt-in, guarded, conservative by default (10 staff, 0 delegates, 5 minutes).
 // READINESS requires --identities from a multi-committee fixture (scripts/rehearsal-fixture.mts with a Chair pool from
 // scripts/rehearsal-identities.mts): one Chair identity/grant per real committee. Legacy single-committee and

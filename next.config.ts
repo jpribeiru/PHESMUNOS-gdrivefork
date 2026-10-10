@@ -1,5 +1,17 @@
 import type { NextConfig } from "next";
 import { version } from "./package.json";
+import { checkTarget, FORBIDDEN_SUPABASE_REFS, supabaseRef } from "./lib/platform/target-guard";
+
+// Target-identity guard: a cloud build may never point at DCMUN's Development project, and the PHESMUN
+// Production deployment must point at the PHESMUN project. Fails the build instead of deploying.
+if (process.env.NEXT_PUBLIC_DATA_BACKEND === "supabase") {
+  const ref = supabaseRef(process.env.NEXT_PUBLIC_SUPABASE_URL);
+  if (ref && (FORBIDDEN_SUPABASE_REFS as readonly string[]).includes(ref)) throw Error(`Target guard: ${ref} is DCMUN's Development project. Refusing to build PHESMUN OS against it.`);
+  if (process.env.VERCEL_ENV === "production") {
+    const target = checkTarget(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.EXPECTED_SUPABASE_REF || undefined);
+    if (!target.ok) throw Error(`Target guard: ${target.reason}. Refusing to build PHESMUN OS for Production.`);
+  }
+}
 
 // Build identity is fixed at build time so every screen can say exactly which
 // deployment it is running. Vercel provides the VERCEL_* system variables.
