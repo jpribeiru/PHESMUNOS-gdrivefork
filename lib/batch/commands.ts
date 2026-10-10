@@ -1,6 +1,7 @@
 import type {ConferenceData} from '../domain';
 import type {BatchCommand} from './types';
 import {amendmentFloorTaken,FLOOR_NOT_WITH_CHAIR} from '../procedure/view';
+import {AMENDMENT_CATEGORY,scoringValues} from '../scoring';
 export function batchFingerprint(d:ConferenceData,c:BatchCommand):string|null{
  if(c.type==='committeeUpdate'||c.type==='committeeLifecycle')return String(d.committees.find(x=>x.id===c.id)?.revision??1);
  if(c.type==='sessionSlot')return c.action==='create'?null:String(d.sessionSlots?.find(x=>x.id===c.id)?.revision??0);
@@ -11,7 +12,7 @@ export function materializeCommitteeSessions(d:ConferenceData,committeeId:string
  for(const slot of [...(d.sessionSlots??[])].filter(s=>!s.archived).sort((a,b)=>a.id.localeCompare(b.id)))d.sessions.push({id:nextId(),committeeId,slotId:slot.id,name:slot.name,startsAt:slot.startsAt,endsAt:slot.endsAt,state:'scheduled',archived:false});
 }
 export function sessionUsed(d:ConferenceData,id:string){return d.attendance.some(x=>x.sessionId===id)||d.documents.some(x=>x.sessionId===id)||d.events.some(x=>x.sessionId===id)||d.queue.some(x=>x.sessionId===id)||d.votes.some(x=>x.sessionId===id)||!!d.timers[id]||!!d.speeches?.some(x=>x.sessionId===id)||!!d.debateStates?.some(x=>x.sessionId===id)||!!d.amendments?.some(x=>x.sessionId===id)||d.committees.some(x=>x.currentSessionId===id);}
-export function applyBatch(d:ConferenceData,c:BatchCommand,nextId:()=>string,now:string){
+export function applyBatch(d:ConferenceData,c:BatchCommand,nextId:()=>string,now:string,actor='chair-demo'){
  if(c.type==='committeeUpdate'||c.type==='committeeLifecycle'){
   const committee=d.committees.find(x=>x.id===c.id);if(!committee)throw Error('Committee unavailable.');
   if(c.type==='committeeUpdate'){
@@ -56,4 +57,9 @@ export function applyBatch(d:ConferenceData,c:BatchCommand,nextId:()=>string,now
  // Procedural invariant: an amendment debate starts, and an active one closes, only with the floor at the Chair.
  if((c.status==='In Debate'||(amendment.status==='In Debate'&&c.status==='Closed'))&&amendmentFloorTaken(d,amendment))throw Error(FLOOR_NOT_WITH_CHAIR);
  Object.assign(amendment,{status:c.status,outcome:c.outcome??null,revision:amendment.revision+1});
+ // Opening the debate credits the amendment's submitter once (Debated Amendment). Mirrors private.apply_staff_batch.
+ if(c.status==='In Debate'&&!d.events.some(e=>e.amendmentId===amendment.id&&e.categoryId===AMENDMENT_CATEGORY)){
+  const sessionId=d.committees.find(x=>x.id===amendment.committeeId)?.currentSessionId??amendment.sessionId;
+  d.events.push({id:nextId(),delegateId:amendment.submitterId,categoryId:AMENDMENT_CATEGORY,points:scoringValues(d,amendment.committeeId,AMENDMENT_CATEGORY)[0],sessionId,resolutionId:amendment.resolutionId,chairId:actor,createdAt:now,amendmentId:amendment.id});
+ }
 }

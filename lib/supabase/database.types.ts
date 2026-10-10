@@ -922,6 +922,7 @@ export type Database = {
       }
       participation_events: {
         Row: {
+          amendmentId: string | null
           categoryId: string
           chairId: string | null
           classification: string | null
@@ -940,6 +941,7 @@ export type Database = {
           yieldedFrom: string | null
         }
         Insert: {
+          amendmentId?: string | null
           categoryId: string
           chairId?: string | null
           classification?: string | null
@@ -958,6 +960,7 @@ export type Database = {
           yieldedFrom?: string | null
         }
         Update: {
+          amendmentId?: string | null
           categoryId?: string
           chairId?: string | null
           classification?: string | null

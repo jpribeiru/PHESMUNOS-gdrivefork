@@ -3225,3 +3225,9 @@ dd {
   margin: 0 0 12px;
   padding-left: 18px;
 }
+
+/* Staff directory edit: committee reassignment checklist */
+.modal fieldset { border:1px solid var(--line); border-radius:8px; padding:8px 12px; margin:0 0 19px; display:grid; gap:4px; }
+.modal fieldset legend { font-size:11px; font-weight:500; color:#74849b; padding:0 4px; }
+.modal .checkbox-row { display:flex; align-items:center; gap:8px; margin:0; font-size:12px; font-weight:400; color:#51647e; }
+.modal .checkbox-row > input { width:auto; min-height:0; margin:0; }
