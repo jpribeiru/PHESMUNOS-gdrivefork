@@ -56,7 +56,7 @@ export function AdminScreen({ section }: { section: string }) {
   const heading = sections[section] || sections[""];
   const delegate = data.delegates.find((d) => d.id === editing);
   const filtered = data.delegates.filter((d) =>
-    `${d.name} ${d.country} ${d.email} ${data.schools.find((s) => s.id === d.schoolId)?.name}`
+    `${d.name} ${d.country} ${d.email ?? ""} ${data.schools.find((s) => s.id === d.schoolId)?.name}`
       .toLowerCase()
       .includes(search.toLowerCase()),
   );
@@ -301,7 +301,7 @@ export function AdminScreen({ section }: { section: string }) {
                       <td>
                         {data.schools.find((s) => s.id === d.schoolId)?.name}
                       </td>
-                      <td>{d.email}</td>
+                      <td>{d.email ?? "—"}</td>
                       <td>
                         <button
                           onClick={() => {
@@ -617,10 +617,10 @@ export function AdminScreen({ section }: { section: string }) {
             <label>
               Email
               <input
-                required
                 name="email"
                 type="email"
-                defaultValue={delegate.email}
+                defaultValue={delegate.email ?? ""}
+                placeholder="Optional"
               />
             </label>
             <button className="primary">Save delegate</button>
