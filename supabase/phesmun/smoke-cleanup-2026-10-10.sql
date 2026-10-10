@@ -8,7 +8,7 @@ do $cleanup$
 declare
   sc constant uuid := 'd0fcf2e1-9526-4eec-9783-f3f503295790';
   real_conf constant uuid := '26aee7e8-ffa6-493f-9924-524eb52b5c4a';
-  users constant uuid[] := array['4c6d7cb5-9d1c-4deb-aff9-0af8e7349b0c','61ae7c2b-1fc8-4454-9f82-5a23a2c009ba']::uuid[];
+  smoke_users constant uuid[] := array['4c6d7cb5-9d1c-4deb-aff9-0af8e7349b0c','61ae7c2b-1fc8-4454-9f82-5a23a2c009ba']::uuid[];
   n bigint; real_before text; real_after text;
   real_snapshot constant text := $q$select concat_ws('|',(select count(*) from public.committees where conference_id=$1),(select count(*) from public.delegates where conference_id=$1),(select count(*) from public.schools where conference_id=$1),(select count(*) from public.sessions where conference_id=$1),(select count(*) from public.user_access where conference_id=$1),(select count(*) from public.audit_log where conference_id=$1),(select count(*) from public.documents where conference_id=$1),(select count(*) from private.access_credentials where conference_id=$1),(select count(*) from private.mutation_receipts where conference_id=$1))$q$;
 begin
@@ -16,7 +16,7 @@ begin
     raise exception 'Target guard: this is not the PHESMUN database. Nothing was deleted.'; end if;
   if not exists(select 1 from public.conferences where id=sc and name='ZZ SMOKE TEST — temporary, will be deleted') then
     raise exception 'Smoke conference not found (already cleaned up?). Nothing was deleted.'; end if;
-  if exists(select 1 from public.user_access where user_id=any(users) and conference_id<>sc) then
+  if exists(select 1 from public.user_access where user_id=any(smoke_users) and conference_id<>sc) then
     raise exception 'A temporary identity has access outside the smoke conference. Nothing was deleted.'; end if;
   execute real_snapshot into real_before using real_conf;
 
@@ -53,7 +53,7 @@ begin
   delete from public.committees where conference_id=sc; get diagnostics n=row_count; if n<>1 then raise exception 'committees %', n; end if;
   delete from public.schools where conference_id=sc; get diagnostics n=row_count; if n<>1 then raise exception 'schools %', n; end if;
   delete from public.conferences where id=sc; get diagnostics n=row_count; if n<>1 then raise exception 'conferences %', n; end if;
-  delete from auth.users where id=any(users) and is_anonymous; get diagnostics n=row_count; if n<>2 then raise exception 'auth.users %', n; end if;
+  delete from auth.users where id=any(smoke_users) and is_anonymous; get diagnostics n=row_count; if n<>2 then raise exception 'auth.users %', n; end if;
 
   execute real_snapshot into real_after using real_conf;
   if real_before is distinct from real_after then raise exception 'Real conference changed (% -> %). Rolled back.', real_before, real_after; end if;
