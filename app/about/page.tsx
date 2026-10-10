@@ -21,6 +21,17 @@ export default function AboutPage() {
           <a href={PLATFORM.creatorUrl} target="_blank" rel="noopener noreferrer">{PLATFORM.creator}</a>
           {" "}(LinkedIn).
         </p>
+        <h2>Credits</h2>
+        <ul className="about-credits">
+          <li>
+            <a href={PLATFORM.creatorUrl} target="_blank" rel="noopener noreferrer">{PLATFORM.creator}</a> — Creator
+          </li>
+          {PLATFORM.contributors.map((c) => (
+            <li key={c.name}>
+              <a href={c.url} target="_blank" rel="noopener noreferrer">{c.name}</a> — {c.role}
+            </li>
+          ))}
+        </ul>
         <p className="small">{PLATFORM.copyright} {PLATFORM.name} is proprietary software, provided to {BRAND.conference} for this conference.</p>
         <p className="small muted">
           The {BRAND.conference} name and logo belong to {BRAND.conferenceName} and are used to identify the conference;

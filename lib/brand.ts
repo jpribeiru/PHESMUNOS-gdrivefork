@@ -12,5 +12,6 @@ export const PLATFORM = {
   creator: "Zuhayr Siddique",
   creatorUrl: "https://www.linkedin.com/in/zhrsidd/",
   copyright: "Copyright © 2026 Zuhayr Siddique. All rights reserved.",
+  contributors: [{ name: "John Paul Ribeiru", role: "Development Contributor", url: "https://www.linkedin.com/in/john-paul-ribeiru-797b2442b" }],
 } as const;
 export const ATTRIBUTION = `${BRAND.product} · Powered by ${PLATFORM.name} · Created by ${PLATFORM.creator}`;
