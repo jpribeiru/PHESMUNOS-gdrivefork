@@ -1,6 +1,12 @@
-# DCMUN Conference OS
+# PHESMUN OS
 
-Next.js App Router, TypeScript and Supabase conference operations. The DCMUN-branded frontend provides Chair, Approval, Admins and Executive workspaces. This is a **development baseline, not a conference-ready production release**.
+**PHESMUN OS** — conference operations for Park House English School Model United Nations.
+Powered by **Conference OS**, created by **Zuhayr Siddique**. Copyright © 2026 Zuhayr Siddique. All rights reserved.
+Proprietary: see [LICENSE](LICENSE) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Origin of this code: [PROVENANCE.md](PROVENANCE.md).
+
+This repository is an operationally isolated deployment of Conference OS (Next.js App Router, TypeScript, Supabase) with its own
+Supabase project and Vercel project. It is not synchronised with any other repository. Deployment, environment and target-guard
+details: [docs/PHESMUN_DEPLOYMENT.md](docs/PHESMUN_DEPLOYMENT.md).
 
 ## Start
 

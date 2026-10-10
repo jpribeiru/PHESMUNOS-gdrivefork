@@ -1,6 +1,7 @@
 /* Static application shell only. Supabase/Auth responses are NEVER cached here. */
-const VERSION = 'conference-os-0.2.4';
-const SHELL = ['/chair','/chair/roll-call','/chair/participation','/chair/documents','/chair/amendments','/chair/voting','/chair/photos','/chair/health','/approval/health','/logistics/health','/admin/health','/dcmun-logo.jpg'];
+// PHESMUN deployment: the cache name still starts with conference-os- so activate() removes every older cache.
+const VERSION = 'conference-os-phesmun-1';
+const SHELL = ['/chair','/chair/roll-call','/chair/participation','/chair/documents','/chair/amendments','/chair/voting','/chair/photos','/chair/health','/approval/health','/logistics/health','/admin/health','/phesmun-logo.png'];
 self.addEventListener('install',event=>event.waitUntil((async()=>{
  const cache=await caches.open(VERSION);
  for(const path of SHELL){
@@ -21,7 +22,7 @@ self.addEventListener('fetch',event=>{
  const request=event.request,url=new URL(request.url);
  if(request.method!=='GET'||url.origin!==self.location.origin)return;
  const navigation=request.mode==='navigate'&&SHELL.includes(url.pathname);
- const asset=url.pathname.startsWith('/_next/static/')||url.pathname==='/dcmun-logo.jpg';
+ const asset=url.pathname.startsWith('/_next/static/')||url.pathname==='/phesmun-logo.png';
  if(!navigation&&!asset)return;
  event.respondWith((async()=>{
   const cache=await caches.open(VERSION);

@@ -1,7 +1,10 @@
 {
-  "name": "conference-os",
+  "name": "phesmun-os",
   "version": "0.2.0",
   "private": true,
+  "description": "PHESMUN OS — Park House English School Model United Nations. Powered by Conference OS, created by Zuhayr Siddique.",
+  "author": "Zuhayr Siddique",
+  "license": "SEE LICENSE IN LICENSE",
   "scripts": {
     "dev": "next dev --hostname 0.0.0.0",
     "build": "next build",

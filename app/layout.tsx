@@ -13,11 +13,19 @@ const manrope = localFont({
 });
 import { OfflineShell } from "@/components/offline-shell";
 import { ConferenceShell } from "@/components/conference-shell";
+import { BRAND, PLATFORM } from "@/lib/brand";
 export const metadata: Metadata = {
-  title: "Conference OS · A calmer conference day",
-  description: "One conference. Every team in sync.",
-  icons: { icon: "/dcmun-logo.jpg" },
+  title: `${BRAND.product} · ${BRAND.conferenceName}`,
+  description: `Conference operations for ${BRAND.conferenceName}. Powered by ${PLATFORM.name}, created by ${PLATFORM.creator}.`,
+  applicationName: BRAND.product,
+  authors: [{ name: PLATFORM.creator, url: PLATFORM.creatorUrl }],
+  creator: PLATFORM.creator,
+  generator: PLATFORM.name,
+  robots: { index: false, follow: false },
+  icons: { icon: [{ url: "/favicon-48.png", sizes: "48x48", type: "image/png" }, { url: "/phesmun-icon-192.png", sizes: "192x192", type: "image/png" }], apple: "/apple-touch-icon.png" },
+  other: { copyright: PLATFORM.copyright },
 };
+export const viewport = { themeColor: "#2b4e16" };
 export default function RootLayout({
   children,
 }: {

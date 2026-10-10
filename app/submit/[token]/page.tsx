@@ -2,16 +2,18 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { findLink } from "@/lib/submissions/link-info";
 import { SubmissionForm } from "@/components/operations/submission-form";
+import { Attribution } from "@/components/attribution";
+import { BRAND } from "@/lib/brand";
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Resolution submission · DCMUN", robots: { index: false, follow: false }, referrer: "no-referrer" };
+export const metadata: Metadata = { title: `Resolution submission · ${BRAND.conference}`, robots: { index: false, follow: false }, referrer: "no-referrer" };
 export default async function SubmitPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
   const link = await findLink(token);
   return (
     <main className="submit-page">
       <header className="submit-header">
-        <Image src="/dcmun-logo.jpg" alt="DCMUN" width={40} height={40} className="brand-logo" />
-        <span>DCMUN · Resolution submission</span>
+        <Image src={BRAND.logo} alt={BRAND.logoAlt} width={40} height={40} className="brand-logo" />
+        <span>{BRAND.conference} · Resolution submission</span>
       </header>
       {link === "unavailable" ? (
         <section className="submit-card" role="alert">
@@ -26,6 +28,7 @@ export default async function SubmitPage({ params }: { params: Promise<{ token: 
       ) : (
         <SubmissionForm token={token} link={link} />
       )}
+      <Attribution className="attribution centered" />
     </main>
   );
 }

@@ -3,8 +3,9 @@ import { headers } from "next/headers";
 import { renderSVG } from "uqr";
 import { findLink } from "@/lib/submissions/link-info";
 import { PrintButton } from "@/components/operations/print-button";
+import { BRAND } from "@/lib/brand";
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Committee submission sheet · DCMUN", robots: { index: false, follow: false }, referrer: "no-referrer" };
+export const metadata: Metadata = { title: `Committee submission sheet · ${BRAND.conference}`, robots: { index: false, follow: false }, referrer: "no-referrer" };
 // Printable A4 room sheet: committee name, QR code, link and three-step instructions.
 export default async function SubmissionSheet({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;

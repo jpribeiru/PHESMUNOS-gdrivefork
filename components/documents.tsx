@@ -1,4 +1,5 @@
 "use client";
+import { BRAND } from "@/lib/brand";
 import { useState } from "react";
 import Link from "next/link";
 import { useConference } from "@/lib/context";
@@ -40,7 +41,7 @@ export function DocumentPreview({ resolution }: { resolution: Resolution }) {
       </div>
       <div className="paper">
         <div className="paper-brand">
-          DCMUN <span>RESOLUTION</span>
+          {BRAND.conference} <span>RESOLUTION</span>
         </div>
         <pre>{version?.text}</pre>
         <div className="paper-footer">

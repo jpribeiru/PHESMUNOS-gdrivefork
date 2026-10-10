@@ -1,0 +1,29 @@
+Conference OS — Proprietary Software Licence
+
+Copyright © 2026 Zuhayr Siddique. All rights reserved.
+
+This repository contains Conference OS, original software created by Zuhayr Siddique (the "Software"),
+deployed here as PHESMUN OS for Park House English School Model United Nations (PHESMUN).
+
+1. Ownership. The Software, including its source code, database migrations, design and documentation, is
+   owned by Zuhayr Siddique, except for the third-party materials described in section 4 and the
+   conference-identity materials described in section 5.
+
+2. No licence by default. No right to copy, modify, merge, publish, distribute, sublicense, sell, host for
+   others or create derivative works of the Software is granted, except with the prior written permission
+   of the copyright holder.
+
+3. Conference use. Access to the deployed PHESMUN OS service is provided for operating the PHESMUN
+   conference. Use of the service does not transfer any ownership of, or licence to, the Software.
+
+4. Third-party materials. The Software uses open-source components (listed in THIRD_PARTY_NOTICES.md) that
+   remain under their own licences. Nothing in this licence restricts rights those licences grant, and no
+   ownership of them is claimed.
+
+5. Conference identity. The PHESMUN name and logo belong to their owners. They are not part of the Software
+   and are not licensed under this document.
+
+6. No warranty. The Software is provided "as is", without warranty of any kind. To the extent permitted by
+   law, the copyright holder is not liable for any claim, damages or other liability arising from its use.
+
+Contact: Zuhayr Siddique — https://www.linkedin.com/in/zhrsidd/

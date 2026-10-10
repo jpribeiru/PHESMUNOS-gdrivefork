@@ -5,6 +5,8 @@ import { useState } from "react";
 import { useConference } from "@/lib/context";
 import { Role } from "@/lib/domain";
 import { Icon, Chip, Timer, Panel } from "./ui";
+import { Attribution } from "./attribution";
+import { BRAND } from "@/lib/brand";
 import { ChairScreen } from "./chair";
 import { Documents, Approval, Logistics } from "./documents";
 import { StatusStrip, SystemHealth, SyncStatus, DataModeLabel } from "./health";
@@ -101,13 +103,13 @@ export function Workspace({ path }: { path: string }) {
           <Link href="/" className="brand">
             <Image
               className="brand-logo"
-              src="/dcmun-logo.jpg"
-              alt="Doha College Model United Nations"
+              src={BRAND.logo}
+              alt={BRAND.logoAlt}
               width={42}
               height={42}
             />
             <span>
-              DCMUN<span className="brand-os"> / OS</span>
+              {BRAND.conference}<span className="brand-os"> / OS</span>
             </span>
           </Link>
           <Chip tone="neutral">{access.status === "active" ? "Staff workspace" : "Interactive demo"}</Chip>
@@ -140,7 +142,7 @@ export function Workspace({ path }: { path: string }) {
           </div>
           <div className="landing-note">
             <span className="dot" />
-            Shared workflow, one source of truth <span>•</span> Development edition · check System health for connection status
+            Shared workflow, one source of truth <span>•</span> check System health for connection status
           </div>
           <div className="landing-bottom">
             <div>
@@ -151,14 +153,15 @@ export function Workspace({ path }: { path: string }) {
               </p>
             </div>
             <span className="edition">
-              DCMUN-inspired
+              {BRAND.conference}
               <br />
-              Demonstration edition · 2026
+              {BRAND.conferenceName} · 2026
             </span>
           </div>
         </div>
         <footer>
           {access.status === "active" ? "Choose one of your assigned workspaces. Conference access is controlled by your staff grant." : "Illustrative data, not official conference records. Local demo roles are for exploration."}
+          <Attribution />
         </footer>
       </main>
     );
@@ -191,17 +194,17 @@ export function Workspace({ path }: { path: string }) {
         <Link href="/" className="brand">
           <Image
             className="brand-logo"
-            src="/dcmun-logo.jpg"
-            alt="Doha College Model United Nations"
+            src={BRAND.logo}
+            alt={BRAND.logoAlt}
             width={42}
             height={42}
           />
           <span>
-            DCMUN<span className="brand-os"> / OS</span>
+            {BRAND.conference}<span className="brand-os"> / OS</span>
           </span>
         </Link>
         <div className="conference-label">
-          <span>DCMUN</span>
+          <span>{BRAND.conference}</span>
           <small>Conference operations</small>
         </div>
         <div className="workspace-label">{roleInfo.name}</div>
@@ -342,9 +345,9 @@ export function Workspace({ path }: { path: string }) {
           )}
         </main>
         <footer className="workspace-footer">
-          Conference OS{" "}
+          <Attribution className="attribution inline" />
           <span>
-            Illustrative DCMUN-inspired data · <DataModeLabel />
+            <DataModeLabel />
           </span>
         </footer>
       </div>
