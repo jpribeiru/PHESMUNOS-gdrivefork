@@ -36,6 +36,10 @@ export function zonedTime(iso: string, timeZone = CONFERENCE_TIMEZONE) {
 export function zonedDay(iso: string, timeZone = CONFERENCE_TIMEZONE) {
   return new Intl.DateTimeFormat("en-GB", { timeZone, weekday: "short", day: "numeric", month: "short" }).format(Date.parse(iso));
 }
+/** "Saturday, 10 October" in the conference zone (staff header). */
+export function zonedLongDay(instant: number | Date, timeZone = CONFERENCE_TIMEZONE) {
+  return new Intl.DateTimeFormat("en-GB", { timeZone, weekday: "long", day: "numeric", month: "long" }).format(instant);
+}
 export function addDays(date: string, days: number) {
   const [y, m, d] = date.split("-").map(Number);
   return new Date(Date.UTC(y, m - 1, d + days)).toISOString().slice(0, 10);

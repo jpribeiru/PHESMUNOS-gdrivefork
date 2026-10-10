@@ -3221,3 +3221,7 @@ dd {
   font-size: inherit;
   color: inherit;
 }
+.about-credits {
+  margin: 0 0 12px;
+  padding-left: 18px;
+}

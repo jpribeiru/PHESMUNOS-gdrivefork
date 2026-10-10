@@ -7,6 +7,7 @@ import { Role } from "@/lib/domain";
 import { Icon, Chip, Timer, Panel } from "./ui";
 import { Attribution } from "./attribution";
 import { BRAND } from "@/lib/brand";
+import { zonedLongDay } from "@/lib/operations/time";
 import { ChairScreen } from "./chair";
 import { Documents, Approval, Logistics } from "./documents";
 import { StatusStrip, SystemHealth, SyncStatus, DataModeLabel } from "./health";
@@ -286,7 +287,7 @@ export function Workspace({ path }: { path: string }) {
           </div>
           <div className="topbar-right">
             <Chip tone="neutral">{access.status === "active" ? "STAFF" : "DEMO"}</Chip>
-            <span>Monday, 5 October</span>
+            <span suppressHydrationWarning>{zonedLongDay(new Date())}</span>
           </div>
         </header>
         <main className="workspace-content">
