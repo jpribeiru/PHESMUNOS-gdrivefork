@@ -541,7 +541,7 @@ export type Database = {
           conference_id: string
           country: string
           created_at: string
-          email: string
+          email: string | null
           flag: string
           id: string
           name: string
@@ -553,7 +553,7 @@ export type Database = {
           conference_id: string
           country: string
           created_at?: string
-          email: string
+          email?: string | null
           flag?: string
           id?: string
           name: string
@@ -565,7 +565,7 @@ export type Database = {
           conference_id?: string
           country?: string
           created_at?: string
-          email?: string
+          email?: string | null
           flag?: string
           id?: string
           name?: string

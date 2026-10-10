@@ -75,7 +75,8 @@ export type Command =
       type: "delegate";
       id: string;
       name: string;
-      email: string;
+      /** Optional; blank or null clears it. */
+      email: string | null;
       country: string;
       /** Derived from country by the client (lib/countries); never typed by staff. */
       flag?: string;
@@ -85,6 +86,7 @@ export type Command =
       rows: {
         name: string;
         country: string;
+        /** Optional; blank means no email. */
         email: string;
         schoolId: string;
         committeeId: string;
@@ -480,20 +482,19 @@ export function applyCommand(
       if (delegate)
         Object.assign(delegate, {
           name: c.name,
-          email: c.email,
+          email: (c.email ?? "").trim() || null,
           country: c.country,
           flag: countryFlag(c.country),
         });
       break;
     }
     case "import": {
-      const emails = new Set(d.delegates.map((x) => x.email.toLowerCase()));
+      const emails = new Set(d.delegates.flatMap((x) => (x.email ? [x.email.toLowerCase()] : [])));
       for (const row of c.rows) {
         if (
           !row.name.trim() ||
           !row.country.trim() ||
-          !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(row.email) ||
-          emails.has(row.email.toLowerCase())
+          (!!row.email && (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(row.email) || emails.has(row.email.toLowerCase())))
         )
           throw Error("Import contains invalid or duplicate delegate records.");
         if (
@@ -501,10 +502,10 @@ export function applyCommand(
           !d.schools.some((x) => x.id === row.schoolId)
         )
           throw Error("Choose a valid committee and school.");
-        emails.add(row.email.toLowerCase());
+        if (row.email) emails.add(row.email.toLowerCase());
       }
       c.rows.forEach((row) =>
-        d.delegates.push({ id: nextId(), ...row, flag: countryFlag(row.country) }),
+        d.delegates.push({ id: nextId(), ...row, email: row.email.trim() || null, flag: countryFlag(row.country) }),
       );
       break;
     }

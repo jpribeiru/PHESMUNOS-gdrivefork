@@ -30,9 +30,9 @@ export function parseCSV(input: string): string[][] {
 export function validateImport(
   rows: string[][],
   mapping: Record<string, number>,
-  existingEmails: string[],
+  existingEmails: (string | null)[],
 ) {
-  const seen = new Set(existingEmails.map((e) => e.toLowerCase()));
+  const seen = new Set(existingEmails.filter((e): e is string => !!e).map((e) => e.toLowerCase()));
   return rows.map((row, i) => {
     const name = row[mapping.name] || "",
       country = row[mapping.country] || "",
@@ -40,10 +40,11 @@ export function validateImport(
     const errors: string[] = [];
     if (!name) errors.push("Name is required");
     if (!country) errors.push("Country is required");
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-      errors.push("Valid email required");
-    if (seen.has(email.toLowerCase())) errors.push("Duplicate email");
-    seen.add(email.toLowerCase());
+    // Email is optional; when present it must be valid and unique (blank cells are never duplicates).
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      errors.push("Invalid email");
+    if (email && seen.has(email.toLowerCase())) errors.push("Duplicate email");
+    if (email) seen.add(email.toLowerCase());
     // The flag is derived from the country text; staff never type an emoji.
     return { line: i + 2, name, country, flag: countryFlag(country), email, errors };
   });

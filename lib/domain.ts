@@ -52,7 +52,8 @@ export interface Delegate {
   country: string;
   flag: string;
   name: string;
-  email: string;
+  /** Optional: null when the delegate has no email. */
+  email: string | null;
 }
 export interface Staff {
   /** Directory contact, not an authentication identity. Published only for assigned Chairs. */
