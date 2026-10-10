@@ -261,7 +261,7 @@ export function createSeed(): ConferenceData {
     scoring: [
       { id: "speech", label: "Speech", values: [1, 2, 3] },
       { id: "poi", label: "POI", values: [1, 2] },
-      { id: "amendment", label: "Amendment", values: [3] },
+      { id: "amendment", label: "Debated Amendment", values: [2] },
       { id: "submitter", label: "Main Submitter", values: [5] },
     ],
     criteria: [],

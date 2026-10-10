@@ -25,6 +25,7 @@ export function activeAmendment(d:Pick<ConferenceData,'amendments'|'documents'>,
 }
 /** Amendment context of a participation event, through the speech it belongs to. */
 export function eventAmendmentId(d:Pick<ConferenceData,'speeches'>,e:ParticipationEvent){
+ if(e.amendmentId)return e.amendmentId;
  return e.speechId?d.speeches?.find(s=>s.id===e.speechId)?.amendmentId??null:null;
 }
 export const FLOOR_NOT_WITH_CHAIR='Finish the current speech and return the floor to the Chair first.';

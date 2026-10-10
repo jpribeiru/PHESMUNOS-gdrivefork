@@ -19,10 +19,10 @@ const blank=()=>{const d=createSeed();d.scoring=[];d.events=[];return d;};
 // ---------------------------------------------------------------- 1. Scoring
 test('blank conference: required procedure scoring exists with defaults and can be established',()=>{
  const t=runner(blank());
- assert.deepEqual(conferenceScoring(t.d).map(s=>[s.id,s.values]),[['speech',[1,2,3]],['poi',[1,2]],['submitter',[5]]]);
+ assert.deepEqual(conferenceScoring(t.d).map(s=>[s.id,s.values]),[['speech',[1,2,3]],['poi',[1,2]],['submitter',[5]],['amendment',[2]]]);
  assert.deepEqual(scoringValues(t.d,'ga1','speech'),[1,2,3],'Chairs can score before an Executive saves anything');
  for(const r of REQUIRED_SCORING.filter(r=>isConfigurableScoring(r.id)))t.run({type:'scoring',id:r.id,values:[...r.values]},'admin');
- assert.deepEqual(t.d.scoring.map(s=>[s.id,s.label,s.values]),[['speech','Speech',[1,2,3]],['poi','POI',[1,2]]]);
+ assert.deepEqual(t.d.scoring.map(s=>[s.id,s.label,s.values]),[['speech','Speech',[1,2,3]],['poi','POI',[1,2]],['amendment','Debated Amendment',[2]]]);
  assert.throws(()=>t.run({type:'scoring',id:'submitter',values:[5]},'admin'),/fixed at \+5/,'Main Submitter is locked');
  assert.throws(()=>t.run({type:'scoring',id:'made-up',values:[1]},'admin'),/Unknown scoring category/);
 });
@@ -55,7 +55,7 @@ test('a committee override replaces only its own category; other committees keep
  assert.deepEqual(scoringValues(t.d,'ecosoc','speech'),[1,2],'conference default elsewhere');
  assert.deepEqual(scoringValues(t.d,'ga1','poi'),[1,2],'other categories still inherit');
  assert.deepEqual(t.d.committees.find(c=>c.id==='ga1')!.scoringOverrides!.map(s=>s.id),['speech']);
- assert.deepEqual(effectiveScoring(t.d,'ga1').map(s=>s.id),['speech','poi','submitter']);
+ assert.deepEqual(effectiveScoring(t.d,'ga1').map(s=>s.id),['speech','poi','submitter','amendment']);
 });
 test('invalid scoring values are rejected',()=>{
  for(const [id,values] of [['speech',[]],['speech',[21]],['speech',[-1]],['speech',[1.5]],['speech',[Number.NaN]],['poi',[1,1]],['speech',[0,1,2,3,4,5,6,7,8,9,10]],['submitter',[3,5]],['submitter',[5]],['submitter',[7]]] as [string,number[]][]){

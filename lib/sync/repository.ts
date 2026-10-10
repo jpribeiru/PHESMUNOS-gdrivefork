@@ -20,7 +20,7 @@ export interface Health {
 export function fingerprint(data: ConferenceData, c: Command): string | null {
   if(isBatchCommand(c))return batchFingerprint(data,c);
   switch (c.type) {
-    case "staffContact": return String(data.staff.find(s=>s.id===c.id)?.contactRevision ?? 1);
+    case "staffContact": case "staffUpdate": case "staffRemove": return String(data.staff.find(s=>s.id===c.id)?.contactRevision ?? 1);
     case "currentSession": return String(data.committees.find(x=>x.id===c.committeeId)?.sessionRevision??0);
     case "debateMode": return String(data.debateStates?.find(x=>x.sessionId===c.sessionId)?.revision??0);
     case "queueOrder": return data.queue.filter(q=>q.sessionId===c.sessionId&&(q.lane??"open")===c.lane).sort((a,b)=>a.position-b.position).map(q=>q.id).join(",");

@@ -7,7 +7,7 @@ import { useState } from "react";
 import { useConference } from "@/lib/context";
 import { AttendanceStatus, Delegate } from "@/lib/domain";
 import { participationSummary, votingOutcome, effectiveScoring } from "@/lib/repository";
-import { scoringLabel, scoringValues } from "@/lib/scoring";
+import { isAutomaticScoring, scoringLabel, scoringValues } from "@/lib/scoring";
 import { eventAmendmentId } from "@/lib/procedure/view";
 import {
   Chip,
@@ -28,7 +28,7 @@ export function Scorer({
   resolutionId: string | null;
 }) {
   const { data, act } = useConference();
-  const definitions = effectiveScoring(data, delegate.committeeId);
+  const definitions = effectiveScoring(data, delegate.committeeId).filter((s) => !isAutomaticScoring(s.id));
   return (
     <div className="scorer">
       {definitions.map((category) => (

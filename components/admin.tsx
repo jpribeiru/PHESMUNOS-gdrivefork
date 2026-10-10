@@ -9,7 +9,7 @@ import { Command, repository } from "@/lib/repository";
 import { Role } from "@/lib/domain";
 import { parseCSV, validateImport } from "@/lib/import";
 import { countryFlag } from "@/lib/countries";
-import { conferenceScoring, effectiveScoring, isConfigurableScoring, parseScoringValues, REQUIRED_SCORING, scoringProblem } from "@/lib/scoring";
+import { conferenceScoring, effectiveScoring, isAutomaticScoring, isConfigurableScoring, parseScoringValues, REQUIRED_SCORING, scoringProblem } from "@/lib/scoring";
 import { Metric, Search } from "./chair";
 import { Chip, Empty, Icon, Modal, PageHeading, Panel } from "./ui";
 const sections: Record<string, [string, string]> = {
@@ -51,10 +51,12 @@ export function AdminScreen({ section }: { section: string }) {
   const [search, setSearch] = useState("");
   const [modal, setModal] = useState<string | null>(null);
   const [editing, setEditing] = useState("");
+  const [staffId, setStaffId] = useState("");
   const [scoreScope, setScoreScope] = useState("conference");
   const [saveError, setSaveError] = useState("");
   const heading = sections[section] || sections[""];
   const delegate = data.delegates.find((d) => d.id === editing);
+  const staffMember = data.staff.find((s) => s.id === staffId);
   const filtered = data.delegates.filter((d) =>
     `${d.name} ${d.country} ${d.email ?? ""} ${data.schools.find((s) => s.id === d.schoolId)?.name}`
       .toLowerCase()
@@ -359,6 +361,7 @@ export function AdminScreen({ section }: { section: string }) {
                   <th>Role</th>
                   <th>Committee scope</th>
                   <th>Contact email</th>
+                  <th />
                 </tr>
               </thead>
               <tbody>
@@ -377,6 +380,12 @@ export function AdminScreen({ section }: { section: string }) {
                         .join(", ") || "Conference-wide"}
                     </td>
                     <td><StaffContact key={`${s.id}-${s.contactRevision}`} id={s.id} email={s.email ?? ""} name={s.name} /></td>
+                    <td>
+                      <div className="actions">
+                        <button aria-label={`Edit ${s.name}`} onClick={() => { setStaffId(s.id); setModal("staffEdit"); }}>Edit</button>
+                        <button aria-label={`Remove ${s.name}`} onClick={() => { setStaffId(s.id); setModal("staffRemove"); }}>Remove</button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -590,6 +599,71 @@ export function AdminScreen({ section }: { section: string }) {
             <CommitteeSelect optional />
             <button className="primary">Save assignment</button>
           </form>
+        </Modal>
+      )}
+      {modal === "staffEdit" && staffMember && (
+        <Modal title={`Edit ${staffMember.name}`} onClose={() => setModal(null)}>
+          <form
+            onSubmit={(e) =>
+              void submit(e, (f) => ({
+                type: "staffUpdate",
+                id: staffMember.id,
+                name: String(f.get("name")),
+                role: String(f.get("role")) as Role,
+                committeeIds: f.getAll("committeeIds").map(String),
+              }))
+            }
+          >
+            <label>
+              Name
+              <input name="name" required defaultValue={staffMember.name} />
+            </label>
+            <label>
+              Role
+              <select name="role" defaultValue={staffMember.role}>
+                {["chair", "approval", "logistics", "admin"].map((r) => (
+                  <option key={r} value={r}>{r === "admin" ? "Executive" : r === "logistics" ? "Admins" : r === "approval" ? "Approval Panel" : "Chair"}</option>
+                ))}
+              </select>
+            </label>
+            <fieldset>
+              <legend>Committees</legend>
+              {data.committees
+                .filter((c) => !c.archived || staffMember.committeeIds.includes(c.id))
+                .map((c) => (
+                  <label key={c.id} className="checkbox-row">
+                    <input
+                      type="checkbox"
+                      name="committeeIds"
+                      value={c.id}
+                      defaultChecked={staffMember.committeeIds.includes(c.id)}
+                    />
+                    {c.code} · {c.name}{c.archived ? " (archived)" : ""}
+                  </label>
+                ))}
+              <p className="footnote">Leave all unchecked for conference-wide. Assigned Chair contacts appear on that committee&apos;s submission form. App access still comes from committee access codes.</p>
+            </fieldset>
+            <button className="primary">Save changes</button>
+          </form>
+        </Modal>
+      )}
+      {modal === "staffRemove" && staffMember && (
+        <Modal title={`Remove ${staffMember.name}?`} onClose={() => setModal(null)}>
+          <p>
+            This removes {staffMember.name} from the staff directory and their committee assignments. Their contact email
+            will no longer appear on submission forms. Access codes and conference records are not changed.
+          </p>
+          <div className="actions">
+            <button onClick={() => setModal(null)}>Cancel</button>
+            <button
+              className="primary"
+              onClick={async () => {
+                if (await act({ type: "staffRemove", id: staffMember.id }, "admin")) setModal(null);
+              }}
+            >
+              Remove from directory
+            </button>
+          </div>
         </Modal>
       )}
       {modal === "delegate" && delegate && (
@@ -959,10 +1033,10 @@ function ScoringSettings({ scope, setScope }: { scope: string; setScope: (scope:
             <form className="definition-row" key={`${scope}-${s.id}-${s.values}`} onSubmit={(e) => { e.preventDefault(); void save(s.id, String(new FormData(e.currentTarget).get("values"))); }}>
               <div>
                 <strong>{s.label}</strong>
-                <p>{s.id === "speech" ? "Chair-judged value for each delivered speech" : s.id === "poi" ? "Chair-judged value after a recognized POI is asked" : "Chair-awarded points"}{committee ? (overridden ? " · committee override" : " · conference default") : builtIn ? " · built-in default" : ""}</p>
+                <p>{s.id === "speech" ? "Chair-judged value for each delivered speech" : s.id === "poi" ? "Chair-judged value after a recognized POI is asked" : isAutomaticScoring(s.id) ? "Credited automatically to the amendment’s submitter, once, when the Chair opens its debate · one value" : "Chair-awarded points"}{committee ? (overridden ? " · committee override" : " · conference default") : builtIn ? " · built-in default" : ""}</p>
               </div>
               <label>
-                Allowed values
+                {isAutomaticScoring(s.id) ? "Points credited" : "Allowed values"}
                 <input name="values" required defaultValue={s.values.join(", ")} aria-label={`${s.label} allowed values`} />
               </label>
               <button disabled={busy}>Save definition</button>

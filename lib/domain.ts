@@ -128,6 +128,8 @@ export interface ParticipationEvent {
   speechId?: ID;
   classification?: SpeechKind;
   yieldedFrom?: ID | null;
+  /** Set on an automatic Debated Amendment credit. */
+  amendmentId?: ID | null;
   revision?: number;
   id: ID;
   delegateId: ID;

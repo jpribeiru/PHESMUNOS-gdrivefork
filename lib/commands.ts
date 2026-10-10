@@ -10,7 +10,7 @@ import {
   Vote,
 } from "./domain";
 import { applyOperationsCommand, isOperationsCommand, operationsRoles, type OperationsCommand } from "./operations/commands";
-import { conferenceScoring, scoringProblem, scoringValues } from "./scoring";
+import { conferenceScoring, isAutomaticScoring, scoringProblem, scoringValues } from "./scoring";
 import { countryFlag } from "./countries";
 export { effectiveScoring } from "./scoring";
 // CODEX REVIEW REQUIRED: extension commands (OperationsCommand) join the union and are
@@ -113,7 +113,9 @@ export type Command =
   | { type: "session"; committeeId: string; name: string }
   | { type: "school"; name: string }
   | { type: "staff"; name: string; role: Role; committeeIds: string[]; email?: string }
-  | { type: "staffContact"; id: string; email: string };
+  | { type: "staffContact"; id: string; email: string }
+  | { type: "staffUpdate"; id: string; name: string; role: Role; committeeIds: string[] }
+  | { type: "staffRemove"; id: string };
 export interface ConferenceRepository {
   getSnapshot(): ConferenceData | null;
   subscribe(listener: () => void): () => void;
@@ -127,7 +129,7 @@ export function participationSummary(data: ConferenceData, delegateId: string) {
     (e) => e.delegateId === delegateId && !e.voidedAt,
   );
   return {
-    opportunities: events.filter(e=>e.categoryId!=="submitter").length,
+    opportunities: events.filter(e=>e.categoryId!=="submitter"&&!isAutomaticScoring(e.categoryId)).length,
     points: events.reduce((n, e) => n + e.points, 0),
     speeches: events.filter((e) => e.categoryId === "speech").length,
   };
@@ -179,6 +181,8 @@ const allowed: Record<Command["type"], Role[]> = {
   school: ["admin"],
   staff: ["admin"],
   staffContact: ["admin"],
+  staffUpdate: ["admin"],
+  staffRemove: ["admin"],
   ...operationsRoles,
   committeeUpdate:["admin"],committeeLifecycle:["admin"],sessionSlot:["admin"],amendmentLink:["admin"],amendmentStatus:["chair"],
   currentSession:["chair"], debateMode:["chair"], queueAdd:["chair"], queueOrder:["chair"], queueRemove:["chair"], speechStart:["chair"], speechYield:["chair"], speechScore:["chair"], speechFinish:["chair"], poiAllowance:["chair"], poiAdd:["chair"], poiOrder:["chair"], poiRecognize:["chair"], poiScore:["chair"], poiRemove:["chair"], voteMode:["chair"], vetoRules:["admin"],
@@ -248,6 +252,7 @@ export function applyCommand(
       break;
     }
     case "participation": {
+      if(isAutomaticScoring(c.categoryId)) throw Error("Debated Amendment credit is recorded automatically when the amendment debate opens.");
       if(c.categoryId==="submitter" && (!c.resolutionId || d.documents.find(r=>r.id===c.resolutionId)?.submitterId!==c.delegateId || d.events.some(e=>e.categoryId==="submitter" && e.resolutionId===c.resolutionId))) throw Error("Main Submitter credit requires a resolution and may only be recorded once.");
       const committeeId = d.sessions.find((s) => s.id === c.sessionId)?.committeeId ?? "";
       if (!scoringValues(d, committeeId, c.categoryId).includes(c.points))
@@ -553,6 +558,21 @@ export function applyCommand(
       staff.contactRevision = (staff.contactRevision ?? 1) + 1;
       break;
     }
+    case "staffUpdate": {
+      const staff = d.staff.find(s=>s.id===c.id);
+      if (!staff) throw Error("Staff member unavailable");
+      if (!c.name.trim()) throw Error("Name required");
+      if (c.committeeIds.some(id=>!d.committees.some(x=>x.id===id))) throw Error("Committee unavailable");
+      staff.name = c.name.trim();
+      staff.role = c.role;
+      staff.committeeIds = [...new Set(c.committeeIds)];
+      staff.contactRevision = (staff.contactRevision ?? 1) + 1;
+      break;
+    }
+    case "staffRemove":
+      if (!d.staff.some(s=>s.id===c.id)) throw Error("Staff member unavailable");
+      d.staff = d.staff.filter(s=>s.id!==c.id);
+      break;
     case "staff":
       d.staff.push({
         id: nextId(),
@@ -564,7 +584,7 @@ export function applyCommand(
       });
       break;
     default:
-      if (isBatchCommand(c)) applyBatch(d,c,nextId,now);
+      if (isBatchCommand(c)) applyBatch(d,c,nextId,now,metadata?.actorId ?? "chair-demo");
       else if (isProcedureCommand(c)) applyProcedure(d,c,nextId,now,metadata?.actorId ?? "chair-demo");
       else if (isOperationsCommand(c)) applyOperationsCommand(d, c, nextId, now);
   }
