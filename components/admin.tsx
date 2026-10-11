@@ -750,7 +750,7 @@ function ImportFlow({ close }: { close: () => void }) {
   const { data, act } = useConference();
   const [step, setStep] = useState(1);
   const [csv, setCsv] = useState(
-    "Name,Country,Email\nLayla Mansour,Italy,layla@example.com\nDaniel Chen,Singapore,daniel@example.com",
+    "Name,Country,Email,Committee\nLayla Mansour,Italy,layla@example.com,GA1\nDaniel Chen,Singapore,,SC",
   );
   const [rows, setRows] = useState<string[][]>([]);
   const [error, setError] = useState("");
@@ -758,14 +758,29 @@ function ImportFlow({ close }: { close: () => void }) {
     name: 0,
     country: 1,
     email: 2,
+    committee: -1,
   });
-  const [committeeId, setCommitteeId] = useState(data.committees[0]?.id ?? "");
+  const activeCommittees = data.committees.filter((c) => !c.archived);
+  const [committeeId, setCommitteeId] = useState(activeCommittees[0]?.id ?? "");
   const [schoolId, setSchoolId] = useState(data.schools[0]?.id ?? "");
   const validated = validateImport(
     rows.slice(1),
     mapping,
     data.delegates.map((d) => d.email),
+    { committees: data.committees, committeeId },
   );
+  const usedColumns = Object.values(mapping).filter((i) => i >= 0);
+  // Guess columns from header names so a typical registration export needs no remapping.
+  function guessMapping(header: string[]) {
+    const find = (...names: string[]) => header.findIndex((h) => names.some((n) => h.trim().toLowerCase() === n));
+    const pick = (i: number, fallback: number) => (i >= 0 ? i : fallback);
+    return {
+      name: pick(find("name", "full name", "delegate", "delegate name"), 0),
+      country: pick(find("country", "delegation", "member state"), 1),
+      email: find("email", "e-mail", "email address"),
+      committee: find("committee", "committee code", "committee name"),
+    };
+  }
   return (
     <>
       <div className="import-steps">
@@ -808,6 +823,7 @@ function ImportFlow({ close }: { close: () => void }) {
                 if (parsed.length < 2)
                   throw Error("Include a header and at least one delegate.");
                 setRows(parsed);
+                setMapping(guessMapping(parsed[0]));
                 setStep(2);
                 setError("");
               } catch (e) {
@@ -822,18 +838,21 @@ function ImportFlow({ close }: { close: () => void }) {
       {step === 2 && (
         <>
           <p>
-            Map your column names and choose the committee and school for this
-            batch.
+            Map your columns and choose the school for this batch. Committees
+            can come from a column (code like &ldquo;GA1&rdquo; or full name)
+            or be the same for every row.
           </p>
-          {["name", "country", "email"].map((field) => (
+          {(["name", "country", "email", "committee"] as const).map((field) => (
             <label key={field}>
-              {field[0].toUpperCase() + field.slice(1)}
+              {field === "email" ? "Email (optional)" : field[0].toUpperCase() + field.slice(1)}
               <select
                 value={mapping[field]}
                 onChange={(e) =>
                   setMapping({ ...mapping, [field]: Number(e.target.value) })
                 }
               >
+                {field === "email" && <option value={-1}>No email column</option>}
+                {field === "committee" && <option value={-1}>Same committee for every row</option>}
                 {rows[0]?.map((header, i) => (
                   <option value={i} key={i}>
                     {header}
@@ -843,19 +862,21 @@ function ImportFlow({ close }: { close: () => void }) {
             </label>
           ))}
           <div className="form-grid">
-            <label>
-              Committee
-              <select
-                value={committeeId}
-                onChange={(e) => setCommitteeId(e.target.value)}
-              >
-                {data.committees.filter(c => !c.archived).map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.code}
-                  </option>
-                ))}
-              </select>
-            </label>
+            {mapping.committee < 0 && (
+              <label>
+                Committee for every row
+                <select
+                  value={committeeId}
+                  onChange={(e) => setCommitteeId(e.target.value)}
+                >
+                  {activeCommittees.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.code}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
             <label>
               School
               <select
@@ -870,11 +891,13 @@ function ImportFlow({ close }: { close: () => void }) {
               </select>
             </label>
           </div>
+          {!data.schools.length && <p className="form-error" role="alert">Add a school first in Executive → Schools.</p>}
+          {!activeCommittees.length && <p className="form-error" role="alert">Add a committee first in Executive → Committees.</p>}
           <div className="actions">
             <button onClick={() => setStep(1)}>Back</button>
             <button
               className="primary"
-              disabled={new Set(Object.values(mapping)).size < 3}
+              disabled={new Set(usedColumns).size < usedColumns.length || !schoolId || (mapping.committee < 0 && !committeeId)}
               onClick={() => setStep(3)}
             >
               Validate rows →
@@ -899,6 +922,7 @@ function ImportFlow({ close }: { close: () => void }) {
                   <th>Row</th>
                   <th>Name</th>
                   <th>Country</th>
+                  <th>Committee</th>
                   <th>Validation</th>
                 </tr>
               </thead>
@@ -908,6 +932,7 @@ function ImportFlow({ close }: { close: () => void }) {
                     <td>{r.line}</td>
                     <td>{r.name}</td>
                     <td>{r.flag} {r.country}</td>
+                    <td>{data.committees.find((c) => c.id === r.committeeId)?.code ?? "—"}</td>
                     <td>
                       {r.errors.length ? (
                         <span className="form-error">
@@ -939,7 +964,7 @@ function ImportFlow({ close }: { close: () => void }) {
                         country: r.country,
                         flag: r.flag,
                         email: r.email,
-                        committeeId,
+                        committeeId: r.committeeId,
                         schoolId,
                       })),
                     },
