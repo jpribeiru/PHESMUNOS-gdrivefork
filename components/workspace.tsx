@@ -19,6 +19,7 @@ import { AmendmentLinks } from "./amendments/links";
 import { ChairPhotos, PhotoReminderBanner } from "./operations/photo-reminders";
 import { PhotoSchedule } from "./operations/photo-schedule";
 import { DelegateSubmissions } from "./operations/resolution-links";
+import { LeoHelper } from "./leo-helper";
 const roles: { id: Role; name: string; description: string; icon: string }[] = [
   {
     id: "chair",
@@ -352,6 +353,7 @@ export function Workspace({ path }: { path: string }) {
           </span>
         </footer>
       </div>
+      <LeoHelper key={`${role}:${role === "chair" ? committeeId : "conference"}`} role={role} committeeId={role === "chair" ? committeeId : undefined} committee={committee?.code} session={session?.name} documents={role === "chair" ? data.documents.filter(document => document.committeeId === committeeId) : data.documents} amendments={role === "chair" ? (data.amendments ?? []).filter(amendment => amendment.committeeId === committeeId) : data.amendments ?? []} />
     </div>
   );
 }
